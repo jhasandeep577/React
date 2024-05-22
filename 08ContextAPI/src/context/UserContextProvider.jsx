@@ -9,6 +9,7 @@ export default function UserContextProvider({ children }) {
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
+      {/* And it also has a property called value to get and set data */}
       {/* createContext() method returned Object ....  which has a method provider() */}
       {children}
       {/* value will be passed to the children components */}
