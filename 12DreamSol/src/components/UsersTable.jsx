@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Table,
   TableBody,
@@ -20,11 +20,10 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useContext } from "react";
 import { DataContext } from "../context/DataContext";
 
 function UserTable() {
-  const { users, setUsers } = useContext(DataContext); // Destructure to get users directly
+  const { users, setUsers } = useContext(DataContext);
 
   // Pagination state
   const [page, setPage] = useState(0);
@@ -50,20 +49,36 @@ function UserTable() {
     setOpenModal(true);
   };
 
-  const handleDelete = (user) => {
-    const updatedUsers = users.filter((u) => u !== user);
-    setUsers(updatedUsers);
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
+  const handleDelete = async (user) => {
+    await fetch(`https://664d82f3ede9a2b55653bf0e.mockapi.io/add/${user.id}`, {
+      method: "DELETE",
+    })
+      .then((res) => res.json())
+      .then(() => {
+        const updatedUsers = users.filter((u) => u.id !== user.id);
+        setUsers(updatedUsers);
+      })
+      .catch((error) => console.error("Error:", error));
   };
 
   // Handle saving edited user
   const handleSaveEditedUser = () => {
-    const updatedUsers = users.map((user) =>
-      user.name === editedUser.name ? editedUser : user
-    );
-    setUsers(updatedUsers);
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    setOpenModal(false);
+    fetch(`https://664d82f3ede9a2b55653bf0e.mockapi.io/add/${editedUser.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(editedUser),
+    })
+      .then((res) => res.json())
+      .then((updatedUser) => {
+        const updatedUsers = users.map((user) =>
+          user.id === updatedUser.id ? updatedUser : user
+        );
+        setUsers(updatedUsers);
+        setOpenModal(false);
+      })
+      .catch((error) => console.error("Error:", error));
   };
 
   return (
@@ -191,7 +206,7 @@ function UserTable() {
               setEditedUser({ ...editedUser, name: e.target.value })
             }
             fullWidth
-            sx={{ mb: 2 }} // Add margin bottom
+            sx={{ mb: 2 }}
           />
           <TextField
             size="small"
@@ -202,18 +217,17 @@ function UserTable() {
               setEditedUser({ ...editedUser, dob: e.target.value })
             }
             fullWidth
-            sx={{ mb: 2 }} // Add margin bottom
+            sx={{ mb: 2 }}
           />
           <TextField
             size="small"
-            type="search"
             label="Department"
             value={editedUser ? editedUser.department : ""}
             onChange={(e) =>
               setEditedUser({ ...editedUser, department: e.target.value })
             }
             fullWidth
-            sx={{ mb: 2 }} // Add margin bottom
+            sx={{ mb: 2 }}
           />
           <TextField
             size="small"
@@ -223,7 +237,7 @@ function UserTable() {
               setEditedUser({ ...editedUser, brief: e.target.value })
             }
             fullWidth
-            sx={{ mb: 2 }} // Add margin bottom
+            sx={{ mb: 2 }}
           />
         </DialogContent>
         <DialogActions>

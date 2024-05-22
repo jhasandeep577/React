@@ -7,25 +7,37 @@ import { DataContextProvider } from "./context/DataContext.js";
 import Home from "./components/Home.jsx";
 
 function App() {
-  let [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  users = localStorage.getItem("users");
-  JSON.parse(users) ? (users = JSON.parse(users)) : [];
+  const getData = async () => {
+    await fetch("https://664d82f3ede9a2b55653bf0e.mockapi.io/add", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setUsers(data))
+      .catch((error) => console.error("Error:", error));
+  };
+
+  useEffect(() => {
+    getData();
+  }, [setUsers, users]);
 
   return (
-    <>
-      <DataContextProvider value={{ users, setUsers }}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<ProjLayout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/addUser" element={<UserForm />} />
-              <Route path="/users" element={<UserTable />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </DataContextProvider>
-    </>
+    <DataContextProvider value={{ users, setUsers }}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<ProjLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/addUser" element={<UserForm />} />
+            <Route path="/users" element={<UserTable />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </DataContextProvider>
   );
 }
+
 export default App;

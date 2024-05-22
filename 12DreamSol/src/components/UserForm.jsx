@@ -14,7 +14,7 @@ const UserForm = () => {
     department: "",
     brief: "",
   });
-  const { setUsers } = useContext(DataContext);
+  const { setUsers, users } = useContext(DataContext);
   const handleChange = (field) => (event) => {
     setFormData({
       ...formData,
@@ -25,14 +25,29 @@ const UserForm = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setUsers(formData);
-    const data = localStorage.getItem("users");
-    if (data != null) {
-      let prevData = JSON.parse(data);
-      localStorage.setItem("users", JSON.stringify([...prevData, formData]));
-    } else {
-      localStorage.setItem("users", JSON.stringify([formData]));
-    }
+
+    // setUsers(formData);
+    // const data = localStorage.getItem("users");
+    // if (data != null) {
+    //   let prevData = JSON.parse(data);
+    //   localStorage.setItem("users", JSON.stringify([...prevData, formData]));
+    // } else {
+    //   localStorage.setItem("users", JSON.stringify([formData]));
+    // }
+
+    //------------------------------------------- Using MOCK API---------------------------------------------------------------
+
+    fetch("https://664d82f3ede9a2b55653bf0e.mockapi.io/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+      .catch((error) => console.error("Error:", error));
+    setUsers(users);
     navigate("/users");
   };
 
